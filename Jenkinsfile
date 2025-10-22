@@ -8,10 +8,7 @@ pipeline {
 	stages {
 		stage('Build Docker image') {
 			steps {
-				sh '''
-          eval $(minikube docker-env)
-          docker build -t $IMAGE_NAME:$VERSION ./app
-        '''
+				sh 'docker build -t $IMAGE_NAME:$VERSION ./app'
 			}
 		}
 
