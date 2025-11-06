@@ -27,6 +27,9 @@ pipeline {
               --context ${WORKSPACE} \
               --dockerfile ${WORKSPACE}/Dockerfile \
               --destination=${REGISTRY}:latest \
+              --cache=false \
+              --no-push-cache \
+              --verbosity=debug \
               --insecure
             """
           }
