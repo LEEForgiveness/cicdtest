@@ -25,7 +25,7 @@ pipeline {
             sh """
             /kaniko/executor \
               --context ${WORKSPACE} \
-              --dockerfile ${WORKSPACE}/app/Dockerfile \
+              --dockerfile ${WORKSPACE}/Dockerfile \
               --destination=${REGISTRY}:latest \
               --insecure
             """
