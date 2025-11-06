@@ -33,6 +33,17 @@ pipeline {
         }
       }
     }
+    stage('Debug Workspace') {
+      steps {
+        script {
+          echo "📂 Listing workspace files..."
+          sh 'ls -al ${WORKSPACE}'
+          echo "📂 Recursive listing..."
+          sh 'ls -R ${WORKSPACE} | head -n 100'
+        }
+      }
+    }
+
     stage('Deploy to k3s') {
       steps {
         echo "🚀 Deploying to k3s..."
