@@ -1,10 +1,40 @@
 pipeline {
   agent {
     kubernetes {
-        label 'jenkins-image-builder'
-        defaultContainer 'jnlp'
+      label 'jenkins-image-builder'
+      defaultContainer 'jnlp'
+      yaml """
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    namespace: jenkins
+  spec:
+    containers:
+    - name: kaniko
+      image: gcr.io/kaniko-project/executor:latest
+      command:
+      - sleep
+      args:
+      - infinity
+      tty: true
+      volumeMounts:
+      - name: kaniko-secret
+        mountPath: /kaniko/.docker/
+    - name: tools
+      image: bitnami/kubectl:latest
+      command:
+      - sleep
+      args:
+      - infinity
+      tty: true
+    volumes:
+    - name: kaniko-secret
+      secret:
+        secretName: regcred
+  """
     }
   }
+
     environment {
         REGISTRY = "g2ang/casbinrule-express-demo"
         PROJECT = "casbinrule-express-demo"
