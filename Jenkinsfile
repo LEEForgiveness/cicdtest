@@ -24,8 +24,8 @@ pipeline {
             def dest = "${env.REGISTRY}:latest"
             sh """
             /kaniko/executor \
-              --context ${WORKSPACE}/app \
-              --dockerfile ${WORKSPACE}/app/Dockerfile \
+              --context ${WORKSPACE} \
+              --dockerfile ${WORKSPACE}/Dockerfile \
               --destination=${REGISTRY}:latest \
               --insecure
             """
