@@ -1,6 +1,6 @@
 FROM node:18-alpine
 WORKDIR /app
-COPY . .
-RUN npm install express
+COPY package*.json ./
+RUN npm install
 ENV PORT=3000
 CMD ["node", "app.js"]
