@@ -8,7 +8,7 @@ pipeline {
 
     environment {
         REGISTRY = "g2ang/casbinrule-express-demo"
-        PROJECT = "casbinrule-express-demo"
+        IMAGE = "casbinrule-express-demo"
     }
 
   stages {
@@ -21,14 +21,13 @@ pipeline {
       steps {
         container('kaniko') {
           script {
-            def dest = "${env.REGISTRY}/${env.PROJECT}:latest"
+            def dest = "${env.REGISTRY}:latest"
             sh """
             /kaniko/executor \
-            --dockerfile=./Dockerfile \
-            --context=dir://./ \
-            --destination=${dest} \
-            --verbosity=debug \
-            --cleanup
+              --context ${WORKSPACE}/app \
+              --dockerfile ${WORKSPACE}/app/Dockerfile \
+              --destination=${REGISTRY}:latest \
+              --insecure
             """
           }
         }
