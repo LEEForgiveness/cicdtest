@@ -11,9 +11,9 @@ spec:
   - name: kaniko
     image: gcr.io/kaniko-project/executor:latest
     command:
-    - /kaniko/executor
+    - sleep
     args:
-    - --help
+    - infinity
     tty: true
     volumeMounts:
     - name: kaniko-secret
