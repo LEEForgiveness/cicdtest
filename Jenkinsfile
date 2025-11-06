@@ -1,44 +1,41 @@
 pipeline {
   agent {
     kubernetes {
-      label 'jenkins-image-builder'
-      defaultContainer 'jnlp'
+        label 'jenkins-image-builder'
+        defaultContainer 'jnlp'
     }
   }
-
-  environment {
-    IMAGE = "casbinrule-express-demo"
-    VERSION = "v${env.BUILD_NUMBER}"
-    REGISTRY = "g2ang/casbinrule-express-demo"
-  }
+    environment {
+        REGISTRY = "g2ang/casbinrule-express-demo"
+        PROJECT = "casbinrule-express-demo"
+    }
 
   stages {
-    stage('Build & Push with Kaniko') {
+    stage('Git Checkout') {
       steps {
-        echo "🏗️ Building Docker image with Kaniko..."
+        checkout scm
+      }
+    }
+    stage('Build & Push') {
+      steps {
         container('kaniko') {
-          sh '''
-          /kaniko/executor \
-            --context ${WORKSPACE}/app \
-            --dockerfile ${WORKSPACE}/app/Dockerfile \
-            --destination=${REGISTRY}:${VERSION} \
-            --insecure
-          '''
+          script {
+            def dest = "${env.REGISTRY}/${env.PROJECT}:latest"
+            sh """
+            /kaniko/executor \
+            --dockerfile=./Dockerfile \
+            --context=dir://./ \
+            --destination=${dest} \
+            --verbosity=debug \
+            --cleanup
+            """
+          }
         }
       }
     }
-
-    stage('Deploy to Kubernetes') {
+    stage('Deploy to k3s') {
       steps {
-        echo "🚀 Deploying to Kubernetes..."
-        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-          sh '''
-          kubectl get nodes
-          kubectl set image deployment/casbinrule-express-demo \
-            casbinrule-express-demo=${REGISTRY}:${VERSION} -n default
-          kubectl rollout status deployment/casbinrule-express-demo -n default
-          '''
-        }
+        sh 'kubectl apply -f k8s/deployment.yaml'
       }
     }
   }
