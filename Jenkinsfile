@@ -35,7 +35,13 @@ pipeline {
     }
     stage('Deploy to k3s') {
       steps {
-        sh 'kubectl apply -f k8s/deployment.yaml'
+        echo "🚀 Deploying to k3s..."
+            container('tools') {
+              sh '''
+              kubectl apply -f k8s/deployment.yaml
+              kubectl rollout status deployment casbinrule-express-demo -n default
+              '''
+            }
       }
     }
   }
