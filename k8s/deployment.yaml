@@ -15,6 +15,6 @@ spec:
     spec:
       containers:
         - name: casbinrule-express-demo
-          image: casbinrule-express-demo:latest
+          image: g2ang/casbinrule-express-demo:latest
           ports:
             - containerPort: 3000
