@@ -25,4 +25,8 @@ app.get("/guests", (req, res) => {
   res.end("Guests Page");
 })
 
+app.get("/test", (req, res) => {
+    res.end("Test Page");
+})
+
 
