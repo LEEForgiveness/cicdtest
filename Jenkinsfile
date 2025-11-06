@@ -4,6 +4,8 @@ pipeline {
       yaml """
 apiVersion: v1
 kind: Pod
+metadata:
+  namespace: jenkins
 spec:
   containers:
   - name: kaniko
