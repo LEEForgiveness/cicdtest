@@ -10,10 +10,10 @@ spec:
   containers:
   - name: kaniko
     image: gcr.io/kaniko-project/executor:latest
-     command:
-     - /kaniko/executor
-     args:
-     - --help
+    command:
+    - /kaniko/executor
+    args:
+    - --help
     tty: true
     volumeMounts:
     - name: kaniko-secret
