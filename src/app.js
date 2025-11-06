@@ -12,7 +12,6 @@ app.listen(3000, () => {
 })
 
 // app.use('/', middleware);
-//test
 app.get("/admin", (req, res) => {
   res.end("Admin Page");
 });
