@@ -1,42 +1,61 @@
 pipeline {
-    agent any
+  agent {
+    kubernetes {
+      yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:latest
+    command:
+    - cat
+    tty: true
+    volumeMounts:
+    - name: kaniko-secret
+      mountPath: /kaniko/.docker/
+  volumes:
+  - name: kaniko-secret
+    secret:
+      secretName: regcred
+"""
+    }
+  }
 
-    environment {
-        IMAGE = "casbinrule-express-demo"
-        VERSION = "v${env.BUILD_NUMBER}"
-        REGISTRY = "g2ang/casbinrule-express-demo"
+  environment {
+    IMAGE = "casbinrule-express-demo"
+    VERSION = "v${env.BUILD_NUMBER}"
+    REGISTRY = "g2ang/casbinrule-express-demo"
+  }
+
+  stages {
+    stage('Build & Push with Kaniko') {
+      steps {
+        echo "🏗️ Building Docker image with Kaniko..."
+        container('kaniko') {
+          sh '''
+          /kaniko/executor \
+            --context ${WORKSPACE}/app \
+            --dockerfile ${WORKSPACE}/app/Dockerfile \
+            --destination=${REGISTRY}:${VERSION} \
+            --insecure
+          '''
+        }
+      }
     }
 
-    stages {
-        stage('Build & Push with Kaniko') {
-            steps {
-                echo "Building Docker image using Kaniko..."
-
-                // Kaniko 직접 실행 (Docker 빌드 환경 없는 Jenkins에서도 가능)
-                sh '''
-                docker run --rm \
-                  -v $(pwd)/app:/workspace \
-                  -v /tmp:/kaniko/.docker \
-                  gcr.io/kaniko-project/executor:latest \
-                  --context /workspace \
-                  --dockerfile /workspace/Dockerfile \
-                  --destination=${REGISTRY}:${VERSION} \
-                  --insecure
-                '''
-            }
+    stage('Deploy to Kubernetes') {
+      steps {
+        echo "🚀 Deploying to Kubernetes..."
+        withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
+          sh '''
+          kubectl get nodes
+          kubectl set image deployment/casbinrule-express-demo \
+            casbinrule-express-demo=${REGISTRY}:${VERSION} -n default
+          kubectl rollout status deployment/casbinrule-express-demo -n default
+          '''
         }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                echo "Deploying to Kubernetes..."
-                withCredentials([file(credentialsId: 'kubeconfig', variable: 'KUBECONFIG')]) {
-                    sh '''
-                    kubectl get nodes
-                    kubectl set image deployment/casbinrule-express-demo casbinrule-express-demo=${REGISTRY}:${VERSION}
-                    kubectl rollout status deployment/casbinrule-express-demo
-                    '''
-                }
-            }
-        }
+      }
     }
+  }
 }
